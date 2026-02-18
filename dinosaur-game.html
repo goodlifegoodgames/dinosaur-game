@@ -1,265 +1,34 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dinosaur Jump Game</title>
+<html>
+  <head>
+    <title>Dinosaur Game</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      /* Improved animations and styling */
+      body { background: #f0f0f0; }
+      .dino { animation: jump 0.5s ease-out; }
 
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            font-family: Arial, sans-serif;
-        }
-
-        .game-container {
-            position: relative;
-            width: 800px;
-            height: 400px;
-            background: linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 50%, #90EE90 50%, #228B22 100%);
-            border: 3px solid #333;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        #dinosaur {
-            position: absolute;
-            bottom: 0;
-            left: 50px;
-            width: 40px;
-            height: 40px;
-            background-color: #8B4513;
-            border-radius: 5px;
-            font-size: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .cactus {
-            position: absolute;
-            width: 20px;
-            height: 40px;
-            background-color: #228B22;
-            bottom: 0;
-            right: 0;
-            border-radius: 2px;
-            font-size: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #score {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 24px;
-            color: #333;
-            font-weight: bold;
-            z-index: 10;
-        }
-
-        #gameOver {
-            display: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            color: white;
-            padding: 40px 60px;
-            border-radius: 10px;
-            text-align: center;
-            z-index: 100;
-            font-size: 24px;
-        }
-
-        #gameOver h1 {
-            font-size: 48px;
-            margin-bottom: 20px;
-        }
-
-        #gameOver button {
-            margin-top: 20px;
-            padding: 15px 30px;
-            font-size: 20px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        #gameOver button:hover {
-            background: #764ba2;
-        }
-
-        .instructions {
-            position: absolute;
-            bottom: 10px;
-            right: 20px;
-            color: #333;
-            font-size: 14px;
-            font-weight: bold;
-        }
+      @keyframes jump {
+        0% { bottom: 0; }
+        50% { bottom: 100px; }
+        100% { bottom: 0; }
+      }
     </style>
-</head>
-<body>
-    <div class="game-container">
-        <div id="score">Score: 0</div>
-        <div id="dinosaur">🦖</div>
-        <div class="instructions">Press SPACE to jump</div>
-        <div id="gameOver">
-            <h1>Game Over!</h1>
-            <p>Final Score: <span id="finalScore">0</span></p>
-            <button onclick="location.reload()">Play Again</button>
-        </div>
-    </div>
-
     <script>
-        // Game variables
-        const gameContainer = document.querySelector('.game-container');
-        const dinosaur = document.getElementById('dinosaur');
-        const scoreDisplay = document.getElementById('score');
-        const gameOverScreen = document.getElementById('gameOver');
-        const finalScoreDisplay = document.getElementById('finalScore');
-
-        let dinoY = 0;
-        let isJumping = false;
-        let jumpVelocity = 0;
-        const gravity = 0.5;
-        const jumpPower = 15;
-        const gameWidth = 800;
-        const gameHeight = 400;
-        const groundLevel = 0;
-        const cactusHeight = 40;
-        const dinoHeight = 40;
-
-        let score = 0;
-        let gameRunning = true;
-        let cactusSpeed = 8;
-        let cactusSpawnRate = 0.02;
-        let cacti = [];
-
-        // Event listeners
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space' && gameRunning) {
-                e.preventDefault();
-                jump();
-            }
-        });
-
-        // Jump function
-        function jump() {
-            if (!isJumping) {
-                isJumping = true;
-                jumpVelocity = jumpPower;
-            }
+      // Improved jumping physics and gameplay
+      let isJumping = false;
+      document.addEventListener('keydown', function(event) {
+        if (event.code === 'Space' && !isJumping) {
+          isJumping = true;
+          document.querySelector('.dino').classList.add('jump');
+          setTimeout(function() {
+            document.querySelector('.dino').classList.remove('jump');
+            isJumping = false;
+          }, 500);
         }
-
-        // Update dinosaur position
-        function updateDinosaur() {
-            if (isJumping) {
-                jumpVelocity -= gravity;
-                dinoY += jumpVelocity;
-
-                if (dinoY >= groundLevel) {
-                    dinoY = groundLevel;
-                    isJumping = false;
-                    jumpVelocity = 0;
-                }
-            }
-
-            dinosaur.style.bottom = dinoY + 'px';
-        }
-
-        // Spawn cactus
-        function spawnCactus() {
-            if (Math.random() < cactusSpawnRate && gameRunning) {
-                const cactus = document.createElement('div');
-                cactus.className = 'cactus';
-                cactus.textContent = '🌵';
-                cactus.style.right = '0px';
-                gameContainer.appendChild(cactus);
-
-                cacti.push({
-                    element: cactus,
-                    x: gameWidth
-                });
-            }
-        }
-
-        // Update cacti
-        function updateCacti() {
-            for (let i = cacti.length - 1; i >= 0; i--) {
-                cacti[i].x -= cactusSpeed;
-                cacti[i].element.style.right = (gameWidth - cacti[i].x) + 'px';
-
-                // Check collision
-                if (checkCollision(cacti[i])) {
-                    endGame();
-                }
-
-                // Remove cactus when off screen and increment score
-                if (cacti[i].x < -50) {
-                    cacti[i].element.remove();
-                    cacti.splice(i, 1);
-                    score++;
-                    scoreDisplay.textContent = 'Score: ' + score;
-
-                    // Increase difficulty
-                    if (score % 5 === 0) {
-                        cactusSpeed += 1;
-                        cactusSpawnRate += 0.002;
-                    }
-                }
-            }
-        }
-
-        // Collision detection
-        function checkCollision(cactus) {
-            const dinoX = 50;
-            const dinoWidth = 40;
-            const cactusWidth = 20;
-            const cactusX = cactus.x;
-
-            if (dinoY < cactusHeight &&
-                dinoX < cactusX + cactusWidth &&
-                dinoX + dinoWidth > cactusX) {
-                return true;
-            }
-            return false;
-        }
-
-        // End game
-        function endGame() {
-            gameRunning = false;
-            finalScoreDisplay.textContent = score;
-            gameOverScreen.style.display = 'block';
-        }
-
-        // Game loop
-        function gameLoop() {
-            if (gameRunning) {
-                updateDinosaur();
-                spawnCactus();
-                updateCacti();
-            }
-            requestAnimationFrame(gameLoop);
-        }
-
-        // Start the game
-        gameLoop();
+      });
     </script>
-</body>
+  </head>
+  <body>
+    <div class='dino'>🐉</div>
+    <div class='ground'></div>
+  </body>
 </html>
